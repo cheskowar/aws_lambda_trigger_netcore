@@ -1,0 +1,63 @@
+# Servicio encargado de monitorear cambios en los archivos de los proveedores.
+#
+# AUTHOR: E Omar Reyes C
+#
+# DOCS: https://serverless.com/framework/docs/providers/aws/
+
+service: carga-service
+app: carga
+frameworkVersion: ">=1.49.0"
+
+provider:
+  name: aws
+  runtime: provided
+  memorySize: 246
+  timeout: 120
+  versionFunctions: ${self:custom.versionFunctions}
+  tags:
+    servicio: carga
+    proyecto: datamaster
+  stage: ${opt:stage, 'dev'}
+  region: ${self:custom.region}
+  deploymentBucket:
+    name: ${self:custom.bucketDeploy}
+    tags:
+      servicio: ci/cd
+      data: dataCarga
+
+custom: ${file(config_deploy/config.${self:provider.stage}.yml)}
+
+package:
+  individually: true
+  exclude:
+    - .vscode/**
+    - __pycache__/**
+    - config_deploy/**
+    - node_modules/**
+    - tests/**
+    - bin/**
+    - obj/**
+    - appsettings.dev.json
+    - aws-lambda-tools-defaults.json
+    - bootstrap
+    - build.sh
+    - event.json
+    - serverless.yml
+    - package.json
+    - package-lock.json
+    - README.md
+    - requirements.txt
+
+functions:
+  procesaArchivo:
+    handler: ProcesaArchivo::Program::FunctionHandler
+    name: ${self:provider.stage}-Carga-ProcesaArchivo
+    description: Descomprime y segmenta los archivos.
+    vpc: ${self:custom.vpc}
+    environment: ${self:custom.environment_procesaarchivo}
+    # layers: ${self:custom.layers}
+    events:
+      - s3: ${self:custom.TRG_BUCKET_PROCESAARCHIVO}
+    package:
+      artifact: ProcesaArchivo/src/ProcesaArchivo/bin/release/netcoreapp3.0/ProcesaArchivo.zip
+
