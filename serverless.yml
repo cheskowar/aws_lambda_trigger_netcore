@@ -4,8 +4,8 @@
 #
 # DOCS: https://serverless.com/framework/docs/providers/aws/
 
-service: carga-service
-app: carga
+service: service_name
+app: app_name
 frameworkVersion: ">=1.49.0"
 
 provider:
@@ -15,15 +15,15 @@ provider:
   timeout: 120
   versionFunctions: ${self:custom.versionFunctions}
   tags:
-    servicio: carga
-    proyecto: datamaster
+    servicio: service
+    proyecto: project
   stage: ${opt:stage, 'dev'}
   region: ${self:custom.region}
   deploymentBucket:
     name: ${self:custom.bucketDeploy}
     tags:
       servicio: ci/cd
-      data: dataCarga
+      data: data
 
 custom: ${file(config_deploy/config.${self:provider.stage}.yml)}
 
@@ -49,9 +49,9 @@ package:
     - requirements.txt
 
 functions:
-  procesaArchivo:
+  procesaFunction:
     handler: ProcesaArchivo::Program::FunctionHandler
-    name: ${self:provider.stage}-Carga-ProcesaArchivo
+    name: ${self:provider.stage}-ProcesaArchivo
     description: Descomprime y segmenta los archivos.
     vpc: ${self:custom.vpc}
     environment: ${self:custom.environment_procesaarchivo}
